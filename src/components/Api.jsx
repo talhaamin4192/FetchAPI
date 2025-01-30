@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const Api = () => {
   const [item, setItem] = useState([]);
-  const [user, setUser] = useState({ name: "", job: "" });
+  const [user, setUser] = useState({ name: "", job: "", email: "" });
 
   useEffect(() => {
     fetch("https://reqres.in/api/users?page=2")
@@ -22,7 +22,16 @@ const Api = () => {
     });
 
     const data = await response.json();
-    console.log("Response:", data);
+
+    // Find the highest ID in the existing list and add 1 for uniqueness
+    const newId = item.length > 0 ? Math.max(...item.map((i) => i.id)) + 1 : 1;
+
+    setItem((prevItems) => [
+      ...prevItems,
+      { id: newId, email: user.email, first_name: data.name, last_name: data.job },
+    ]);
+
+    setUser({ name: "", job: "", email: "" });
   };
 
   return (
@@ -65,6 +74,13 @@ const Api = () => {
             placeholder="Job"
             value={user.job}
             onChange={(e) => setUser({ ...user, job: e.target.value })}
+            className="border p-2 rounded w-64"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
             className="border p-2 rounded w-64"
           />
           <button type="submit" className="bg-blue-500 text-white p-2 rounded">
