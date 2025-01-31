@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 const Api = () => {
   const [item, setItem] = useState([]);
   const [user, setUser] = useState({ name: "", job: "", email: "" });
+  const [editUser, setEditUser] = useState(null); // Holds user being edited
 
   useEffect(() => {
     fetch("https://reqres.in/api/users?page=2")
@@ -10,6 +11,7 @@ const Api = () => {
       .then((data) => setItem(data.data));
   }, []);
 
+  // Create User
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -22,8 +24,6 @@ const Api = () => {
     });
 
     const data = await response.json();
-
-    // Find the highest ID in the existing list and add 1 for uniqueness
     const newId = item.length > 0 ? Math.max(...item.map((i) => i.id)) + 1 : 1;
 
     setItem((prevItems) => [
@@ -32,6 +32,36 @@ const Api = () => {
     ]);
 
     setUser({ name: "", job: "", email: "" });
+  };
+
+  // Delete User
+  const handleDelete = async (id) => {
+    await fetch(`https://reqres.in/api/users/${id}`, { method: "DELETE" });
+
+    setItem((prevItems) => prevItems.filter((user) => user.id !== id));
+  };
+
+  // Update User
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    const response = await fetch(`https://reqres.in/api/users/${editUser.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(editUser),
+    });
+
+    const data = await response.json();
+
+    setItem((prevItems) =>
+      prevItems.map((user) =>
+        user.id === editUser.id ? { ...user, first_name: data.name, last_name: data.job, email: editUser.email } : user
+      )
+    );
+
+    setEditUser(null); // Clear edit state
   };
 
   return (
@@ -44,6 +74,7 @@ const Api = () => {
               <th className="px-4 py-2 border border-gray-300 text-left font-medium">Email</th>
               <th className="px-4 py-2 border border-gray-300 text-left font-medium">First Name</th>
               <th className="px-4 py-2 border border-gray-300 text-left font-medium">Last Name</th>
+              <th className="px-4 py-2 border border-gray-300 text-left font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -53,12 +84,27 @@ const Api = () => {
                 <td className="px-4 py-2 border border-gray-300">{data.email}</td>
                 <td className="px-4 py-2 border border-gray-300">{data.first_name}</td>
                 <td className="px-4 py-2 border border-gray-300">{data.last_name}</td>
+                <td className="px-4 py-2 border border-gray-300 flex gap-2">
+                  <button
+                    onClick={() => setEditUser(data)}
+                    className="bg-yellow-500 text-white px-2 py-1 rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(data.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      {/* Create User Form */}
       <div className="p-6 flex flex-col items-center">
         <h2 className="text-xl font-bold mb-4">Create User</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -88,6 +134,46 @@ const Api = () => {
           </button>
         </form>
       </div>
+
+      {/* Edit User Form */}
+      {editUser && (
+        <div className="p-6 flex flex-col items-center">
+          <h2 className="text-xl font-bold mb-4">Edit User</h2>
+          <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+            <input
+              type="text"
+              placeholder="Name"
+              value={editUser.first_name}
+              onChange={(e) => setEditUser({ ...editUser, first_name: e.target.value })}
+              className="border p-2 rounded w-64"
+            />
+            <input
+              type="text"
+              placeholder="Job"
+              value={editUser.last_name}
+              onChange={(e) => setEditUser({ ...editUser, last_name: e.target.value })}
+              className="border p-2 rounded w-64"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={editUser.email}
+              onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+              className="border p-2 rounded w-64"
+            />
+            <button type="submit" className="bg-green-500 text-white p-2 rounded">
+              Update
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditUser(null)}
+              className="bg-gray-500 text-white p-2 rounded mt-2"
+            >
+              Cancel
+            </button>
+          </form>
+        </div>
+      )}
     </>
   );
 };
