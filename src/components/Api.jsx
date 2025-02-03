@@ -110,14 +110,14 @@ const Api = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             type="text"
-            placeholder="Name"
+            placeholder="First Name"
             value={user.name}
             onChange={(e) => setUser({ ...user, name: e.target.value })}
             className="border p-2 rounded w-64"
           />
           <input
             type="text"
-            placeholder="Job"
+            placeholder="Last Name"
             value={user.job}
             onChange={(e) => setUser({ ...user, job: e.target.value })}
             className="border p-2 rounded w-64"
@@ -142,14 +142,14 @@ const Api = () => {
           <form onSubmit={handleUpdate} className="flex flex-col gap-4">
             <input
               type="text"
-              placeholder="Name"
+              placeholder="First Name"
               value={editUser.first_name}
               onChange={(e) => setEditUser({ ...editUser, first_name: e.target.value })}
               className="border p-2 rounded w-64"
             />
             <input
               type="text"
-              placeholder="Job"
+              placeholder="Last Name"
               value={editUser.last_name}
               onChange={(e) => setEditUser({ ...editUser, last_name: e.target.value })}
               className="border p-2 rounded w-64"
