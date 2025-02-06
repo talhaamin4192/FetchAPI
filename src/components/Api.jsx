@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 const Api = () => {
   const [item, setItem] = useState([]);
   const [user, setUser] = useState({ name: "", job: "", email: "" });
-  const [editUser, setEditUser] = useState(null); // Holds user being edited
+  const [editUser, setEditUser] = useState(null);
 
   useEffect(() => {
     fetch("https://reqres.in/api/users?page=2")
@@ -11,8 +12,12 @@ const Api = () => {
       .then((data) => setItem(data.data));
   }, []);
 
-  // Create User
   const handleSubmit = async (e) => {
+    Swal.fire({
+      title: "Done!",
+      text: "New user has been created!",
+      icon: "success"
+    });
     e.preventDefault();
 
     const response = await fetch("https://reqres.in/api/users", {
@@ -34,34 +39,65 @@ const Api = () => {
     setUser({ name: "", job: "", email: "" });
   };
 
-  // Delete User
   const handleDelete = async (id) => {
-    await fetch(`https://reqres.in/api/users/${id}`, { method: "DELETE" });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await fetch(`https://reqres.in/api/users/${id}`, { method: "DELETE" });
 
-    setItem((prevItems) => prevItems.filter((user) => user.id !== id));
+        setItem((prevItems) => prevItems.filter((user) => user.id !== id));
+
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
   };
 
-  // Update User
+
   const handleUpdate = async (e) => {
+    Swal.fire({
+      icon: "success",
+      title: "User has been updated Successfully!",
+      showConfirmButton: false,
+      timer: 1500
+    });
     e.preventDefault();
 
-    const response = await fetch(`https://reqres.in/api/users/${editUser.id}`, {
+    await fetch(`https://reqres.in/api/users/${editUser.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(editUser),
+      body: JSON.stringify({
+        name: editUser.first_name,
+        job: editUser.last_name,
+      }),
     });
-
-    const data = await response.json();
 
     setItem((prevItems) =>
       prevItems.map((user) =>
-        user.id === editUser.id ? { ...user, first_name: data.name, last_name: data.job, email: editUser.email } : user
+        user.id === editUser.id
+          ? {
+              ...user,
+              first_name: editUser.first_name,
+              last_name: editUser.last_name,
+              email: editUser.email,
+            }
+          : user
       )
     );
 
-    setEditUser(null); // Clear edit state
+    setEditUser(null);
   };
 
   return (
@@ -104,7 +140,6 @@ const Api = () => {
         </table>
       </div>
 
-      {/* Create User Form */}
       <div className="p-6 flex flex-col items-center">
         <h2 className="text-xl font-bold mb-4">Create User</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -135,7 +170,6 @@ const Api = () => {
         </form>
       </div>
 
-      {/* Edit User Form */}
       {editUser && (
         <div className="p-6 flex flex-col items-center">
           <h2 className="text-xl font-bold mb-4">Edit User</h2>
