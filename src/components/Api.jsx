@@ -56,7 +56,7 @@ const Api = () => {
 
         Swal.fire({
           title: "Deleted!",
-          text: "Your file has been deleted.",
+          text: "User has been deleted.",
           icon: "success",
         });
       }
@@ -88,11 +88,11 @@ const Api = () => {
       prevItems.map((user) =>
         user.id === editUser.id
           ? {
-              ...user,
-              first_name: editUser.first_name,
-              last_name: editUser.last_name,
-              email: editUser.email,
-            }
+            ...user,
+            first_name: editUser.first_name,
+            last_name: editUser.last_name,
+            email: editUser.email,
+          }
           : user
       )
     );
